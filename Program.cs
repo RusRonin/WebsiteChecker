@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using System.Xml.Linq;
 
 namespace WebsiteChecker
 {
@@ -79,8 +81,29 @@ namespace WebsiteChecker
         internal static void ConfigureXml()
         {
             xmlDoc = new XmlDocument();
-            xmlDoc.Load("sites.xml");
-            xmlRoot = xmlDoc.DocumentElement;
+            try
+            {
+                xmlDoc.Load("sites.xml");
+                xmlRoot = xmlDoc.DocumentElement;
+            }
+            //в случае необнаружения xml файла создается новый.
+            //реализовано средствами linq to xml, так как это единственный найденный мною
+            //способ избежать необнаружения корневого элемента.
+            //этой же цели служит фальшивый адрес и его последущее удаление
+            //за счет сверки с пустым списком
+            catch (FileNotFoundException)
+            {
+                XDocument xdoc = new XDocument(new XElement("sites",
+                    new XElement("site",
+                        new XAttribute("address", "noaddress")
+                    )));
+                xdoc.Save("sites.xml");
+
+                xmlDoc.Load("sites.xml");
+                xmlRoot = xmlDoc.DocumentElement;
+                List<Site> sites = new List<Site>() { };
+                CommitChanges(sites);
+            }                       
         }
 
         internal static void AddSite(ref List<Site> sites)
