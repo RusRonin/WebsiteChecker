@@ -5,30 +5,17 @@ using System.Threading.Tasks;
 
 namespace WebsiteAvailabilityTracker
 {
-    internal class SiteChecker
-    {
-        //singleton
+    public class SiteChecker : ISiteChecker
+    { 
 
         const int checkingTimeStep = 500;
         const int maxCheckingInterval = 10000;
 
         private int millisecondsPassed;
 
-
-        private static SiteChecker siteChecker = null;
-
-        private SiteChecker()
+        internal SiteChecker()
         {
             millisecondsPassed = checkingTimeStep;
-        }
-
-        internal static SiteChecker GetSiteChecker()
-        {
-            if (siteChecker == null)
-            {
-                siteChecker = new SiteChecker();
-            }
-            return siteChecker;
         }
 
         internal static int GetCheckingTimeStep()
@@ -41,14 +28,13 @@ namespace WebsiteAvailabilityTracker
             return maxCheckingInterval;
         }
 
-        internal void CheckSites(List<Site> sites)
+        internal void CheckSites(ISiteList sites)
         {
             foreach (Site site in sites)
             {
                 if (millisecondsPassed % site.CheckingFrequency == 0)
                 {
                     //временная заглушка вместо проверки сайтов
-                    UserInterface.PrintString(site.Address, true);
                 }
                 if (millisecondsPassed == maxCheckingInterval)
                 {
@@ -61,9 +47,14 @@ namespace WebsiteAvailabilityTracker
             }
         }
 
+        public void CheckSite(Site site)
+        {
+            //checking site
+        }
+
         internal async void CheckSitesAsync(object obj)
         {
-            List<Site> sites = obj as List<Site>;
+            ISiteList sites = obj as ISiteList;
             if (sites as List<Site> != null)
             {
                 await Task.Run(() => CheckSites(sites));

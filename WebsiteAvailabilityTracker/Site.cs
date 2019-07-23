@@ -8,22 +8,12 @@ namespace WebsiteAvailabilityTracker
     {
         public string Address { get; set; }
         public uint CheckingFrequency { get; set; }
-
-        private int checkingTimeStep = SiteChecker.GetCheckingTimeStep();
-        private int maxCheckingInterval = SiteChecker.GetMaxCheckingInterval();
+        public int LastCheckCode { get; set; }
 
         public Site(string siteAddress, uint frequency)
         {
             Address = siteAddress;
-            //частота проверки изменяется с шагом в полсекунды и не может быть меньше 10 секунд
-            if ((frequency % checkingTimeStep == 0) && (frequency <= maxCheckingInterval))
-            {
-                CheckingFrequency = frequency;
-            }
-            else
-            {
-                throw new SiteCheckingFrequencyException("Incorrect frequency value");
-            }
+            CheckingFrequency = frequency;
         }
 
         public int Compare(Site s1, Site s2)
