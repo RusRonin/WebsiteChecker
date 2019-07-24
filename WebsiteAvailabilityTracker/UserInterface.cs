@@ -75,11 +75,15 @@ namespace WebsiteAvailabilityTracker
                     {
                         sites.CommitChanges();
                     }
-                    catch (TxtDbFileNotFoundException e)
+                    catch (DatabaseFileNotFoundException e)
                     {
                         PrintString($"Ошибка сохранения данных: {e.Message}", true);
                     }
-                    catch (TxtDatabaseException e)
+                    catch (DatabaseException e)
+                    {
+                        PrintString($"Ошибка сохранения данных: {e.Message}", true);
+                    }
+                    catch (DatabaseNullArgumentException e)
                     {
                         PrintString($"Ошибка сохранения данных: {e.Message}", true);
                     }
@@ -93,13 +97,17 @@ namespace WebsiteAvailabilityTracker
                     {
                         sites.ReloadSites();
                     }
-                    catch (TxtDbFileNotFoundException e)
+                    catch (DatabaseFileNotFoundException e)
                     {
                         PrintString($"Ошибка загрузки данных: {e.Message}", true);
                     }
-                    catch (TxtDatabaseException e)
+                    catch (DatabaseException e)
                     {
                         PrintString($"Ошибка загрузки данных: {e.Message}", true);
+                    }
+                    catch (DatabaseNullArgumentException e)
+                    {
+                        PrintString($"Ошибка сохранения данных: {e.Message}", true);
                     }
                     catch (Exception e)
                     {

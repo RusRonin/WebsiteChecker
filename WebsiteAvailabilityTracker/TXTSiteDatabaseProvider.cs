@@ -33,7 +33,7 @@ namespace WebsiteAvailabilityTracker
             catch (Exception)
             {
                 filePath = "";
-                throw new TxtDatabaseException("Ошибка настройки базы данных");
+                throw new DatabaseException("Ошибка настройки базы данных");
             }
 
             return filePath;
@@ -73,11 +73,11 @@ namespace WebsiteAvailabilityTracker
             }
             catch (FileNotFoundException)
             {
-                throw new TxtDbFileNotFoundException("Файл базы данных не найден");
+                throw new DatabaseFileNotFoundException("Файл базы данных не найден");
             }
             catch (Exception)
             {
-                throw new TxtDatabaseException("Ошибка чтения базы данных");
+                throw new DatabaseException("Ошибка чтения базы данных");
             }
 
             return sites;
@@ -98,25 +98,25 @@ namespace WebsiteAvailabilityTracker
             }
             catch (FileNotFoundException)
             {
-                throw new TxtDbFileNotFoundException("Файл базы данных не найден");
+                throw new DatabaseFileNotFoundException("Файл базы данных не найден");
             }
             catch (Exception)
             {
-                throw new TxtDatabaseException("Ошибка записи в базу данных");
+                throw new DatabaseException("Ошибка записи в базу данных");
             }
         }
     }
 
-    class TxtDatabaseException : Exception
+    class DatabaseException : Exception
     {
-        public TxtDatabaseException(string message)
+        public DatabaseException(string message)
             : base(message)
         { }
     }
 
-    class TxtDbFileNotFoundException : FileNotFoundException
+    class DatabaseFileNotFoundException : FileNotFoundException
     {
-        public TxtDbFileNotFoundException(string message)
+        public DatabaseFileNotFoundException(string message)
             : base(message)
         { }
     }

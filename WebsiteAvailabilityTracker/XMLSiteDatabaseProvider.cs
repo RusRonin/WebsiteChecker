@@ -12,14 +12,12 @@ namespace WebsiteAvailabilityTracker
         private static XmlDocument xmlDoc;
         private static XmlElement xmlRoot;
 
-        public XMLSiteDatabaseProvider(out int errorCode)
+        public XMLSiteDatabaseProvider()
         {
-            int configError;
-            ConfigureDatabase(out configError);
-            errorCode = configError;
+            ConfigureDatabase();
         }
 
-        private void ConfigureDatabase(out int errorCode)
+        private void ConfigureDatabase()
         {
             try
             {
@@ -46,20 +44,19 @@ namespace WebsiteAvailabilityTracker
                     xmlDoc.Load("sites.xml");
                     xmlRoot = xmlDoc.DocumentElement;
                 }
-                errorCode = (int) Errors.ErrorCode.NoError;
             }
             catch (XmlException)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_XMLError;
+                throw new DatabaseException("Ошибка XML базы данных");
             }
             catch (Exception)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_OtherError;
+                throw new DatabaseException("Ошибка базы данных");
             }
 
         }
 
-        public List<Site> LoadSites(out int errorCode)
+        public List<Site> LoadSites()
         {
             List<Site> sites = new List<Site>() { };
             try
@@ -77,28 +74,27 @@ namespace WebsiteAvailabilityTracker
                             {
                                 Site site = new Site(addressAttribute.Value, frequency);
                                 sites.Add(site);
-                            }                            
+                            }
                         }
                     }
                 }
-                errorCode = (int) Errors.ErrorCode.NoError;
             }
             catch (XmlException)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_XMLError;
+                throw new DatabaseException("Ошибка XML базы данных");
             }
             catch (ArgumentNullException)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_NullArgumentError;
+                throw new DatabaseNullArgumentException("Ошибка базы данных");
             }
             catch (Exception)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_OtherError;
+                throw new DatabaseException("Ошибка базы данных");
             }
             return sites;
         }
 
-        public void SaveSites(ISiteList siteList, out int errorCode)
+        public void SaveSites(ISiteList siteList)
         {
             try
             {
@@ -150,20 +146,26 @@ namespace WebsiteAvailabilityTracker
                 }
 
                 xmlDoc.Save("sites.xml");
-                errorCode = (int) Errors.ErrorCode.NoError;
             }
             catch (XmlException)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_XMLError;
+                throw new DatabaseException("Ошибка XML базы данных");
             }
             catch (ArgumentNullException)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_NullArgumentError;
+                throw new DatabaseNullArgumentException("Ошибка базы данных");
             }
             catch (Exception)
             {
-                errorCode = (int) Errors.ErrorCode.XmlDbProvider_OtherError;
+                throw new DatabaseException("Ошибка базы данных");
             }
         }
+    }
+
+    class DatabaseNullArgumentException : ArgumentNullException
+    {
+        public DatabaseNullArgumentException(string message)
+            : base(message)
+        { }
     }
 }
