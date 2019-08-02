@@ -7,12 +7,17 @@ using System.Xml.Linq;
 
 namespace WebsiteAvailabilityTracker
 {
-    internal static class SiteListChanger
+    public class XMLSiteDatabaseProvider : ISiteDatabaseProvider
     {
         private static XmlDocument xmlDoc;
         private static XmlElement xmlRoot;
 
-        internal static void ConfigureXml()
+        public XMLSiteDatabaseProvider()
+        {
+            ConfigureDatabase();
+        }
+
+        private void ConfigureDatabase()
         {
             try
             {
@@ -38,89 +43,20 @@ namespace WebsiteAvailabilityTracker
 
                     xmlDoc.Load("sites.xml");
                     xmlRoot = xmlDoc.DocumentElement;
-                    List<Site> sites = new List<Site>() { };
-                    CommitChanges(sites);
                 }
             }
             catch (XmlException)
             {
-                UserInterface.PrintString("Возникла ошибка при работе с базой данных. Пожалуйста перезагрузите приложение.", true);
+                throw new DatabaseException("Ошибка XML базы данных");
             }
             catch (Exception)
             {
-                UserInterface.PrintString("Возникла ошибка. Пожалуйста перезагрузите приложение", true);
+                throw new DatabaseException("Ошибка базы данных");
             }
 
         }
 
-        internal static void AddSite(ref List<Site> sites)
-        {
-            Site site;
-            while (true)
-            {
-                UserInterface.PrintString("Введите адрес сайта: ", false);
-                string siteAddress = UserInterface.ReadLine();
-                UserInterface.PrintString(
-                    $"Введите частоту проверки в миллисекундах с шагом {SiteChecker.GetCheckingTimeStep()}" +
-                    $" ({SiteChecker.GetCheckingTimeStep()}, {SiteChecker.GetCheckingTimeStep() * 2}...):", false);
-                string enteredFrequency = UserInterface.ReadLine();
-                uint siteCheckingFrequency;
-                bool successfulParse = UInt32.TryParse(enteredFrequency, out siteCheckingFrequency);
-                if (!successfulParse)
-                {
-                    UserInterface.PrintString("Некорректный ввод. Попробуйте еще раз.", true);
-                    continue;
-                }
-                try
-                {
-                    site = new Site(siteAddress, siteCheckingFrequency);
-                    break;
-                }
-                catch (SiteCheckingFrequencyException e)
-                {
-                    UserInterface.PrintString("Некорректное значение частоты проверки." +
-                        $" Частота должна быть целым положительным числом, кратным {SiteChecker.GetCheckingTimeStep()}", true);
-                    continue;
-                }
-                catch (Exception e)
-                {
-                    UserInterface.PrintString("Введенные данные содержат ошибку." +
-                        " Пожалуйста попробуйте еще раз.", true);
-                    continue;
-                }
-            }
-            
-
-            if (sites.IndexOf(site) > -1)
-            {
-                UserInterface.PrintString("Данный сайт уже есть в списке", true);
-            }
-            else
-            {
-                sites.Add(site);
-            }
-        }
-
-        internal static void RemoveSite(ref List<Site> sites)
-        {
-            UserInterface.PrintString("Введите адрес сайта: ", false);
-            string siteAddress = Console.ReadLine();
-            //частота не влияет ни на что, так как Equals сравнивает только по адресам
-            Site site = new Site(siteAddress, (uint) SiteChecker.GetCheckingTimeStep());
-
-            RemoveSite(ref sites, site);
-        }
-
-        internal static void RemoveSite(ref List<Site> sites, Site site)
-        {
-            while (sites.IndexOf(site) > -1)
-            {
-                sites.Remove(site);
-            }
-            UserInterface.PrintString("Данный сайт удален из списка", true);
-        }
-
-        internal static List<Site> LoadSites()
+        public List<Site> LoadSites()
         {
             List<Site> sites = new List<Site>() { };
             try
@@ -138,30 +74,32 @@ namespace WebsiteAvailabilityTracker
                             {
                                 Site site = new Site(addressAttribute.Value, frequency);
                                 sites.Add(site);
-                            }                            
+                            }
                         }
                     }
                 }
             }
             catch (XmlException)
             {
-                UserInterface.PrintString("Возникла ошибка при работе с базой данных. Пожалуйста перезагрузите приложение.", true);
+                throw new DatabaseException("Ошибка XML базы данных");
             }
             catch (ArgumentNullException)
             {
-                UserInterface.PrintString("Возникла ошибка. Пожалуйста перезагрузите приложение", true);
+                throw new DatabaseNullArgumentException("Ошибка базы данных");
             }
             catch (Exception)
             {
-                UserInterface.PrintString("Возникла ошибка. Пожалуйста перезагрузите приложение", true);
+                throw new DatabaseException("Ошибка базы данных");
             }
             return sites;
         }
 
-        internal static void CommitChanges(List<Site> sites)
+        public void SaveSites(ISiteList siteList)
         {
             try
             {
+                //копируем список сайтов, чтобы не изменять тот, с которым мы работаем
+                ISiteList sites = (ISiteList) siteList.Clone();
                 //проверяем сайты на устаревание. устаревшие(удаленные из списка) удаляем из документа, 
                 //не устаревшие удаляем из вспомогательного списка
                 foreach (XmlNode xmlNode in xmlRoot)
@@ -182,7 +120,7 @@ namespace WebsiteAvailabilityTracker
                                 }
                                 else
                                 {
-                                    RemoveSite(ref sites, site);
+                                    sites.RemoveSite(site);
                                 }
                             }
                         }
@@ -211,16 +149,23 @@ namespace WebsiteAvailabilityTracker
             }
             catch (XmlException)
             {
-                UserInterface.PrintString("Возникла ошибка при работе с базой данных. Пожалуйста перезагрузите приложение.", true);
+                throw new DatabaseException("Ошибка XML базы данных");
             }
             catch (ArgumentNullException)
             {
-                UserInterface.PrintString("Возникла ошибка. Пожалуйста перезагрузите приложение", true);
+                throw new DatabaseNullArgumentException("Ошибка базы данных");
             }
             catch (Exception)
             {
-                UserInterface.PrintString("Возникла ошибка. Пожалуйста перезагрузите приложение", true);
+                throw new DatabaseException("Ошибка базы данных");
             }
         }
+    }
+
+    class DatabaseNullArgumentException : ArgumentNullException
+    {
+        public DatabaseNullArgumentException(string message)
+            : base(message)
+        { }
     }
 }
