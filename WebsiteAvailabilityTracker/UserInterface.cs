@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace WebsiteAvailabilityTracker
 {
@@ -12,13 +13,14 @@ namespace WebsiteAvailabilityTracker
         public void PrintCommandList()
         {
             PrintString("Введите команду из следующего списка: ", true);
-            PrintString("- Добавить :для добавления сайта в список", true);
-            PrintString("- Удалить :для удаления сайта из списка", true);
-            PrintString("- Сохранить :для сохранения внесенных изменений", true);
-            PrintString("- Сброс :для сброса изменений (отката к последнему сохранению)", true);
-            PrintString("- Печать :для вывода списка сайтов", true);
-            PrintString("- Выключение :для завершения работы с программой", true);
-            PrintString("- Справка :для повторного вывода списка команд", true);
+            PrintString("- Добавить : для добавления сайта в список", true);
+            PrintString("- Удалить : для удаления сайта из списка", true);
+            PrintString("- Сохранить : для сохранения внесенных изменений", true);
+            PrintString("- Сброс : для сброса изменений (отката к последнему сохранению)", true);
+            PrintString("- Печать : для вывода списка сайтов", true);
+            PrintString("- Проверка : для разовой проверки сайта", true);
+            PrintString("- Выключение : для завершения работы с программой", true);
+            PrintString("- Справка : для повторного вывода списка команд", true);
         }
 
         public void PrintString(string text, bool withWrap)
@@ -42,14 +44,15 @@ namespace WebsiteAvailabilityTracker
             return Console.ReadLine();
         }
 
-        public void ReadCommand(ISiteList sites, ref bool endWork)
+        public void ReadCommand(ISiteList sites, CancellationTokenSource cts, ref bool endWork, ref bool asyncCheckRestart)
         {
             Site site;
+            SiteResponse response;
             string command = ReadLine();
             switch (command.ToLower())
             {
                 case "добавить":
-                    site = GetNewSiteFromUser();
+                    site = GetSiteWithFrequencyFromUser();
                     if (site != null)
                     {
                         try
@@ -67,7 +70,7 @@ namespace WebsiteAvailabilityTracker
                     }
                     break;
                 case "удалить":
-                    site = GetExcistingSiteFromUser();
+                    site = GetSiteFromUser();
                     sites.RemoveSite(site);
                     break;
                 case "сохранить":
@@ -90,6 +93,10 @@ namespace WebsiteAvailabilityTracker
                     catch (Exception e)
                     {
                         PrintString($"Ошибка сохранения данных: {e.Message}", true);
+                    }
+                    finally
+                    {
+                        cts.Cancel();
                     }
                     break;
                 case "сброс":
@@ -117,7 +124,13 @@ namespace WebsiteAvailabilityTracker
                 case "печать":
                     PrintSites(sites);
                     break;
+                case "проверка":
+                    site = GetSiteFromUser();
+                    response = new SiteResponse(site);
+                    PrintString($"{site.Address}: {response.GetStatusCode()} - {response.GetStatusCodeText()}", true);
+                    break;
                 case "выключение":
+                    cts.Cancel();
                     endWork = true;
                     break;
                 case "справка":
@@ -129,7 +142,7 @@ namespace WebsiteAvailabilityTracker
             }
         }
 
-        private Site GetNewSiteFromUser()
+        private Site GetSiteWithFrequencyFromUser()
         {
             PrintString("Введите адрес сайта: ", false);
             string address = ReadLine();
@@ -148,7 +161,7 @@ namespace WebsiteAvailabilityTracker
             }
         }
 
-        private Site GetExcistingSiteFromUser()
+        private Site GetSiteFromUser()
         {
             PrintString("Введите адрес сайта: ", false);
             string address = ReadLine();
