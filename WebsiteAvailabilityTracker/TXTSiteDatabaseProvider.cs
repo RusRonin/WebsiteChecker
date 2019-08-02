@@ -17,7 +17,7 @@ namespace WebsiteAvailabilityTracker
 
         private void ConfigureDatabase()
         {
-            path = GetPathToFile() + "site.txt";
+            path = GetPathToFile() + "\\sites.txt";
             CheckFileExistanceOrCreate();
         }
 
@@ -27,7 +27,7 @@ namespace WebsiteAvailabilityTracker
 
             try
             {
-                var location = Assembly.GetExecutingAssembly().Location;
+                var location = Assembly.GetExecutingAssembly().Location;               
                 filePath = Path.GetDirectoryName(location);
             }
             catch (Exception)
@@ -35,16 +35,15 @@ namespace WebsiteAvailabilityTracker
                 filePath = "";
                 throw new DatabaseException("Ошибка настройки базы данных");
             }
-
             return filePath;
         }
 
         private void CheckFileExistanceOrCreate()
         {
-            FileInfo fileInfo = new FileInfo(path);
-            if (!fileInfo.Exists)
+            using (FileStream fstream = new FileStream(path, FileMode.OpenOrCreate))
             {
-                fileInfo.Create();
+                //FileStream реализует IDisposable, поэтому не возникает ошибки одновременного доступа, как с FileInfo
+                //используется пустой блок using, т.к. он имеет более лаконичный синтаксис, чем последовательный вызов методов
             }
         }
 
@@ -75,11 +74,11 @@ namespace WebsiteAvailabilityTracker
             {
                 throw new DatabaseFileNotFoundException("Файл базы данных не найден");
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 throw new DatabaseException("Ошибка чтения базы данных");
             }
-
             return sites;
         }
 

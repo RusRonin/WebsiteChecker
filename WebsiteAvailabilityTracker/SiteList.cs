@@ -18,6 +18,12 @@ namespace WebsiteAvailabilityTracker
             ReloadSites();
         }
 
+        private SiteList(ISiteDatabaseProvider databaseProvider, List<Site> sites)
+        {
+            _databaseProvider = databaseProvider;
+            _sites = sites;
+        }
+
         private void CheckSiteCorrectness(Site site)
         {
             //добавить регулярное выражение для проверки адреса
@@ -67,7 +73,7 @@ namespace WebsiteAvailabilityTracker
 
         public object Clone()
         {
-            SiteList siteList = new SiteList(_databaseProvider);
+            /*SiteList siteList = new SiteList(_databaseProvider);
 
             foreach (Site site in siteList)
             {
@@ -77,7 +83,8 @@ namespace WebsiteAvailabilityTracker
             {
                 siteList.AddSite(site);
             }
-            return siteList;
+            return siteList;*/
+            return new SiteList(_databaseProvider, _sites);
         }
     }
 }

@@ -1,64 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace WebsiteAvailabilityTracker
 {
     public class SiteChecker : ISiteChecker
-    { 
+    {
+        private IScanResultFileProvider _scanResultFileProvider;
 
-        const int checkingTimeStep = 500;
-        const int maxCheckingInterval = 10000;
-
-        private int millisecondsPassed;
-
-        internal SiteChecker()
+        public SiteChecker(IScanResultFileProvider scanResultFileProvider)
         {
-            millisecondsPassed = checkingTimeStep;
+            _scanResultFileProvider = scanResultFileProvider;
         }
 
-        internal static int GetCheckingTimeStep()
+        public void CheckSites(ISiteList sites, CancellationToken token)
         {
-            return checkingTimeStep;
-        }
-
-        internal static int GetMaxCheckingInterval()
-        {
-            return maxCheckingInterval;
-        }
-
-        internal void CheckSites(ISiteList sites)
-        {
-            foreach (Site site in sites)
+            List<SiteResponse> responses = new List<SiteResponse>();
+            DateTime currentDateTime;
+            DateTime previousDateTime = DateTime.Now;
+            while (!token.IsCancellationRequested)
             {
-                if (millisecondsPassed % site.CheckingFrequency == 0)
+                currentDateTime = DateTime.Now;
+                TimeSpan passedTime = (currentDateTime - previousDateTime);
+                uint passedMilliseconds = (uint) passedTime.TotalMilliseconds;
+                foreach (Site site in sites)
                 {
-                    //временная заглушка вместо проверки сайтов
+                    if (site.NeedToBeChecked(passedMilliseconds))
+                    {
+                        SiteResponse siteResponse = new SiteResponse(site);
+                        if (responses.IndexOf(siteResponse) > -1)
+                        {
+                            //т.к. сравнение происходит только по сайту, здесь удаляется прошлый ответ от этого сайта и записывается новый
+                            responses.Remove(siteResponse);
+                        }
+                        responses.Add(siteResponse);
+                    }
                 }
-                if (millisecondsPassed == maxCheckingInterval)
-                {
-                    millisecondsPassed = checkingTimeStep;
-                }
-                else
-                {
-                    millisecondsPassed += checkingTimeStep;
-                }
+                _scanResultFileProvider.WriteScanResults(responses);
+                Thread.Sleep(500);
             }
         }
 
-        public void CheckSite(Site site)
+        public SiteResponse CheckSite(Site site)
         {
-            //checking site
+            return new SiteResponse(site);
         }
 
-        internal async void CheckSitesAsync(object obj)
+        public async Task<SiteResponse> CheckSiteAsync(Site site)
         {
-            ISiteList sites = obj as ISiteList;
-            if (sites as List<Site> != null)
+            return await Task.Run(() => CheckSite(site));
+        }
+
+        public async void CheckSitesAsync(ISiteList sites, CancellationToken token)
+        {
+            if (!token.IsCancellationRequested)
             {
-                await Task.Run(() => CheckSites(sites));
-            }
+                await Task.Run(() => CheckSites(sites, token));
+            }          
         }
     }
 }

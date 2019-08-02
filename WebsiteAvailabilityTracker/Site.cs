@@ -8,12 +8,33 @@ namespace WebsiteAvailabilityTracker
     {
         public string Address { get; set; }
         public uint CheckingFrequency { get; set; }
-        public int LastCheckCode { get; set; }
+
+        private uint timeUntilNextCheck;
 
         public Site(string siteAddress, uint frequency)
         {
             Address = siteAddress;
             CheckingFrequency = frequency;
+            timeUntilNextCheck = CheckingFrequency;
+        }
+
+        public uint GetTimeUntilNextCheck()
+        {
+            return timeUntilNextCheck;
+        }
+
+        public bool NeedToBeChecked(uint timeGone)
+        {
+            if (timeGone >= timeUntilNextCheck)
+            {
+                timeUntilNextCheck = CheckingFrequency;
+                return true;
+            }
+            else
+            {
+                timeUntilNextCheck -= timeGone;
+                return false;
+            }
         }
 
         public int Compare(Site s1, Site s2)

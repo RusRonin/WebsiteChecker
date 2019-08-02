@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace WebsiteAvailabilityTracker
 {
@@ -8,6 +9,6 @@ namespace WebsiteAvailabilityTracker
     {
         void PrintCommandList();
         void PrintSites(ISiteList sites);
-        void ReadCommand(ISiteList sites, ref bool endWork);
+        void ReadCommand(ISiteList sites, CancellationTokenSource cts, ref bool endWork, ref bool asyncCheckRestart);
     }
 }
