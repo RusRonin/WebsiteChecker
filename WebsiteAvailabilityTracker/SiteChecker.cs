@@ -15,7 +15,7 @@ namespace WebsiteAvailabilityTracker
             _scanResultFileProvider = scanResultFileProvider;
         }
 
-        public void CheckSites(ISiteList sites, CancellationToken token)
+        public void CheckSites(ISiteDatabaseProvider sites, CancellationToken token)
         {
             List<SiteResponse> responses = new List<SiteResponse>();
             DateTime currentDateTime;
@@ -53,7 +53,7 @@ namespace WebsiteAvailabilityTracker
             return await Task.Run(() => CheckSite(site));
         }
 
-        public async void CheckSitesAsync(ISiteList sites, CancellationToken token)
+        public async void CheckSitesAsync(ISiteDatabaseProvider sites, CancellationToken token)
         {
             if (!token.IsCancellationRequested)
             {
