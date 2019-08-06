@@ -14,16 +14,16 @@ namespace WebsiteAvailabilityTracker
             ConfigureService(serviceCollection);
             var serviceProvider = serviceCollection.BuildServiceProvider();
 
-            var userInterface = serviceProvider.GetService<ICommandUserInterface>();
+            var userInterface = serviceProvider.GetService<IUserInterface>();
 
-            var sites = serviceProvider.GetService<ISiteList>();
+            var sites = serviceProvider.GetService<ISiteDatabaseProvider>();
 
             var siteChecker = serviceProvider.GetService<ISiteChecker>();
 
             CancellationTokenSource cts = new CancellationTokenSource();
             CancellationToken token = cts.Token;
 
-            siteChecker.CheckSitesAsync((ISiteList)sites.Clone(), token);
+            siteChecker.CheckSitesAsync(sites, token);
 
             userInterface.PrintCommandList();
             bool endWork = false;
@@ -36,7 +36,7 @@ namespace WebsiteAvailabilityTracker
                     cts = new CancellationTokenSource();
                     token = cts.Token;
 
-                    siteChecker.CheckSitesAsync((ISiteList)sites.Clone(), token);
+                    siteChecker.CheckSitesAsync(sites, token);
                 }
             }
         }
@@ -45,8 +45,8 @@ namespace WebsiteAvailabilityTracker
         {
             serviceCollection.AddScoped<ISiteDatabaseProvider, TXTSiteDatabaseProvider>();
             serviceCollection.AddScoped<ISiteChecker, SiteChecker>();
-            serviceCollection.AddScoped<ICommandUserInterface, UserInterface>();
-            serviceCollection.AddScoped<ISiteList, SiteList>();
+            serviceCollection.AddScoped<IUserInterface, UserInterface>();
+            //serviceCollection.AddScoped<ISiteList, SiteList>();
             serviceCollection.AddScoped<IScanResultFileProvider, ScanResultFileProvider>();
         }
     }

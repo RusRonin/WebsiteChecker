@@ -8,9 +8,9 @@ namespace WebsiteAvailabilityTracker
 {
     public interface ISiteChecker
     {
-        void CheckSites(ISiteList sites, CancellationToken token);
+        void CheckSites(ISiteDatabaseProvider sites, CancellationToken token);
         SiteResponse CheckSite(Site site);
         Task<SiteResponse> CheckSiteAsync(Site site);
-        void CheckSitesAsync(ISiteList sites, CancellationToken token);
+        void CheckSitesAsync(ISiteDatabaseProvider sites, CancellationToken token);
     }
 }

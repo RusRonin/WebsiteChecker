@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace WebsiteAvailabilityTracker
 {
-    public class UserInterface : ICommandUserInterface
+    public class UserInterface : IUserInterface
     {
         public UserInterface()
         { }
@@ -29,7 +29,7 @@ namespace WebsiteAvailabilityTracker
             Console.Write(outputText);
         }
 
-        public void PrintSites(ISiteList sites)
+        public void PrintSites(ISiteDatabaseProvider sites)
         {
             PrintString("Список сайтов: ", true);
             foreach (Site site in sites)
@@ -44,7 +44,7 @@ namespace WebsiteAvailabilityTracker
             return Console.ReadLine();
         }
 
-        public void ReadCommand(ISiteList sites, CancellationTokenSource cts, ref bool endWork, ref bool asyncCheckRestart)
+        public void ReadCommand(ISiteDatabaseProvider sites, CancellationTokenSource cts, ref bool endWork, ref bool asyncCheckRestart)
         {
             Site site;
             SiteResponse response;
