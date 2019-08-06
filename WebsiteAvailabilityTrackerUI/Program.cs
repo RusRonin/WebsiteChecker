@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using WebsiteAvailabilityTracker;
 
-namespace WebsiteAvailabilityTracker
+namespace WebsiteAvailabilityTrackerUI
 {
     class Program
     {

@@ -147,7 +147,7 @@ namespace WebsiteAvailabilityTracker
         }
     }
 
-    class SiteCheckingFrequencyException : ArgumentException
+    public class SiteCheckingFrequencyException : ArgumentException
     {
         public SiteCheckingFrequencyException(string message)
             : base(message)

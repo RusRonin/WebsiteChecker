@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using WebsiteAvailabilityTracker;
 
-namespace WebsiteAvailabilityTracker
+namespace WebsiteAvailabilityTrackerUI
 {
     public class UserInterface : IUserInterface
     {
