@@ -23,7 +23,7 @@ namespace WebsiteAvailabilityTracker
 
         private void ConfigureDatabase()
         {
-            path = GetPathToFile() + "\\sites.txt";
+            path = GetPathToFile() + "sites.txt";
             CheckFileExistanceOrCreate();
         }
 
@@ -33,14 +33,16 @@ namespace WebsiteAvailabilityTracker
 
             try
             {
-                var location = Assembly.GetExecutingAssembly().Location;               
-                filePath = Path.GetDirectoryName(location);
+                //var location = Assembly.GetExecutingAssembly().Location;               
+                //filePath = Path.GetDirectoryName(location);
+                filePath = AppDomain.CurrentDomain.BaseDirectory;
             }
             catch (Exception)
             {
                 filePath = "";
                 throw new DatabaseException("Ошибка настройки базы данных");
             }
+            Console.WriteLine(filePath);
             return filePath;
         }
 
@@ -171,14 +173,14 @@ namespace WebsiteAvailabilityTracker
         }
     }
 
-    class DatabaseException : Exception
+    public class DatabaseException : Exception
     {
         public DatabaseException(string message)
             : base(message)
         { }
     }
 
-    class DatabaseFileNotFoundException : FileNotFoundException
+    public class DatabaseFileNotFoundException : FileNotFoundException
     {
         public DatabaseFileNotFoundException(string message)
             : base(message)

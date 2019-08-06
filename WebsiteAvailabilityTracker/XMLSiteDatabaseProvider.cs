@@ -232,7 +232,7 @@ namespace WebsiteAvailabilityTracker
         }
     }
 
-    class DatabaseNullArgumentException : ArgumentNullException
+    public class DatabaseNullArgumentException : ArgumentNullException
     {
         public DatabaseNullArgumentException(string message)
             : base(message)

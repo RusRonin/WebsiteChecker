@@ -6,7 +6,7 @@ using System.Text;
 
 namespace WebsiteAvailabilityTracker
 {
-    class ScanResultFileProvider : IScanResultFileProvider
+    public class ScanResultFileProvider : IScanResultFileProvider
     {
         string path;
 
